@@ -1,47 +1,70 @@
+"use strict";
 const path = require("path");
-const HtmlWebPackPlugin = require("html-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
+const Dotenv = require("dotenv-webpack");
 
 module.exports = {
-  entry: "./src/index.js",
+  entry: {
+    main: ["./components/App.js"],
+  },
   output: {
-    filename: "bundle.js",
-    path: path.resolve(__dirname, "build")
+    path: path.resolve(__dirname, "./build"),
+    filename: "[name].js",
   },
-  devServer: {
-    contentBase: path.resolve(__dirname, "build"),
-    index: "index.html",
-    port: 3000,
-    proxy: {
-      '/user_inform': {
-        target: 'http://localhost:3001/',
-        changeOrigin: true,
-      }
-    }
-  },
-  mode: "development",
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
-        exclude: "/node_modules",
-        use: ['babel-loader'],
+        test: /\.js$/,
+        include: path.resolve(__dirname, "./src"),
+        loader: "babel-loader",
       },
       {
-        test: /\.html$/,
+        test: /\.css$/,
+        loader: "style-loader!css-loader",
+      },
+      {
+        test: /\.(jpg|jpeg|gif|png|svg|ico)?$/,
         use: [
           {
-            loader: "html-loader",
-            options: { minimize: true }
-          }
-        ]
-      }
-    ]
+            loader: "url-loader",
+            options: {
+              limit: 10000,
+              fallback: "file-loader",
+              name: "images/[name].[ext]",
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(woff|woff2|eot|ttf|otf)$/,
+        use: [
+          {
+            loader: "url-loader",
+            options: {
+              limit: 10000,
+              fallback: "file-loader",
+              name: "fonts/[name].[ext]",
+            },
+          },
+        ],
+      },
+    ],
   },
   plugins: [
-    new HtmlWebPackPlugin({
-      template: './src/index.html',
-      filename: 'index.html'
-    })
+    new CopyWebpackPlugin([
+      {
+        context: "./public",
+        from: "*.*",
+      },
+    ]),
+    new Dotenv(),
   ],
-  devtool: "eval-source-map"
+  devServer: {
+    contentBase: "./public",
+    host: "localhost",
+    port: 3000,
+    proxy: {
+      "**": "http://localhost:3000",
+    },
+  },
 };
