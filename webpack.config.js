@@ -1,6 +1,5 @@
 "use strict";
 const path = require("path");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 const Dotenv = require("dotenv-webpack");
 
 module.exports = {
@@ -49,22 +48,5 @@ module.exports = {
         ],
       },
     ],
-  },
-  plugins: [
-    new CopyWebpackPlugin([
-      {
-        context: "./public",
-        from: "*.*",
-      },
-    ]),
-    new Dotenv(),
-  ],
-  devServer: {
-    contentBase: "./public",
-    host: "localhost",
-    port: 3000,
-    proxy: {
-      "**": "http://localhost:3000",
-    },
   },
 };
